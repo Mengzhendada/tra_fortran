@@ -18,15 +18,16 @@
       iy=12345_ 8
         nev=-2
        open(8,file='bins.txt')
-        do ipoint=1,9
+        do ipoint=1,1
         read(8,*)ii,ebeam,q2,x
          if(ipoint.eq.1.or.ipoint.eq.5.or.ipoint.eq.9)then   
         print*,'ii,ebeam,q2,x',ii,ebeam,q2,x
-        do iz=1,3   
+        do iz=1,1
         write (file_name,"(i2.2,'.z',i0,'.dat')") ipoint, iz
         open(16,file=trim(file_name))
 
-        z=zmin+5d-1*dble(iz-1)*(zmax-zmin)
+c        z=zmin+5d-1*dble(iz-1)*(zmax-zmin)
+        z=0.375
         pt2up=(q2*z/2d0/amp/x)**2-amhh**2
         if(amhh**2 + amp2 - (q2**2*z)/(2.*amp2*x**2) - (q2*(-1 + x + z))
      & /x.lt.m2th)
@@ -41,15 +42,19 @@
         print*,'pt2up',pt2up
         print*,'pt2max',pt2max
         pt2max=min(0.999d0*pt2up,1.33d0)
-        do ipt=1,10
-        pt=sqrt(pt2min+dble(ipt-1)/9d0*(pt2max-pt2min))
-        print*,'pt',pt
-        print*,'pt2max',pt2max
+c        do ipt=1,1
+c        pt=sqrt(pt2min+dble(ipt-1)/9d0*(pt2max-pt2min))
+c     loop over qt_over_q2, using ipt
+      do ipt=1,150
+      pt = (0.05+dble(ipt-1)/150d0)*q2*z
+      print*,'pt',pt
+      print*,'pt2max',pt2max
       un=1
       le=0d0
       etal=0d0
       etat=1d0
-      nev=1e7
+      nev=1e2
+c      nev=1e7
       sumsib=0d0
       sumsigi=0d0
       sumsigt=0d0
@@ -59,7 +64,7 @@
       sumsibc=0d0
       sumsigci=0d0
       sumsigct=0d0
-c      do j=1,nev
+      do j=1,nev
       phih=2d0*pi*urand8(iy)
       pheta=2d0*pi*urand8(iy)
       call haprad3(ebeam,iy,1,sib,sigi,sigt) 
@@ -76,8 +81,11 @@ c            stop
       sumsibc=sumsibc+4d0*pi**2*sin(phih+pheta)*sib/dble(nev)
       sumsigci=sumsigci+4d0*pi**2*sin(phih+pheta)*sigi/dble(nev)
       sumsigct=sumsigct+4d0*pi**2*sin(phih+pheta)*sigt/dble(nev)
-c      enddo
-c           print*,1,ipoint,iz,ipt,z,sumsibs/sumsib,sumsigs/sumsig,sumsigs*sumsib/sumsig/sumsibs
+      enddo
+      print*,1,"ipoint,iz,ipt,qt_to_q2,z,sumsib,sumsigi,sumsigt,sumsibs,
+     &      sumsigsi,sumsigst,sumsibc,sumsigci,sumsigct"
+      print*,1,ipoint,iz,ipt,0.05+dble(ipt-1)/150d0,z,sumsib,sumsigi,sumsigt,sumsibs,
+     &      sumsigsi,sumsigst,sumsibc,sumsigci,sumsigct
 c      write(16,'(18g14.5)')q2,x,z,pt**2,sumsibs/sumsib,sumsigsi/sumsigi,
 c     & sumsigst/sumsigt,sumsibc/sumsib,sumsigci/sumsigi,sumsigct/sumsigt
 c      write(*,'(i5,18g14.5)')ipoint,q2,x,z,pt**2,sumsibs/sumsib,
@@ -353,7 +361,7 @@ c       print*,j,sig-sib,sig/sib
      & +2d0*ml2*(4d0*mp2*vm**2+lq*mpi2-z*sx**2*(z*Q2+2d0*vm) ))
        call sfsidis(x,z,q2,pt,un,etal,etat,cos(pheta-phih)
      & ,sin(pheta-phih),hsf0)
-       print*,'tau min and tau max', tamin,tamax 
+       print*,'sx, lq, q2,phih, tau min and tau max',sx,lq,q2,phih, tamin,tamax 
       end
 
       subroutine gridsidis_sf
@@ -483,15 +491,15 @@ c       print*,j,sig-sib,sig/sib
      -     (2*a4i*mp+2*a5i*q2+2*a3i*(w-mp)+a2i*(2*mp2-q2-2*w**2))+ 
      -    2*a2i*((mp2+q2)**2+w**2*(w**2-2*mp2+2*q2))-(mpi2-q2-t)*
      -     (4*a3i*w+2*a5i*(mp2+q2-w**2)-a2i*(3*mp2+3*q2+5*w**2)))/8./w
-            if(q2.gt.1d-2.and.tnet(it).gt.1d0)then
-           print*,'it,iw,iq2,q2,w,t,tnet(it)',it,iw,iq2,q2,w,t,tnet(it)
-           print*,'const mp mn mpi ',mp,mn,mpi
-           print*,'a1r,a1i,..'
-           print'(13(g12.5))',a1r,a1i,a2r,a2i,a3r,a3i,a4r,a4i,a5r,a5i,a6r,a6i
-           print*,'f1r,f1i,..'
-           print'(13(g12.5))',f1r,f1i,f2r,f2i,f3r,f3i,f4r,f4i,f5r,f5i,f6r,f6i
+c            if(q2.gt.1d-2.and.tnet(it).gt.1d0)then
+c           print*,'it,iw,iq2,q2,q2net,w,wnet,t,tnet(it)',it,iw,iq2,q2,q2net(iq2),w,wnet(iw)*1d-3,t,tnet(it)
+c           print*,'const mp mn mpi ',mp,mn,mpi
+c           print*,'a1r,a1i,..'
+c           print'(13(g12.5))',a1r,a1i,a2r,a2i,a3r,a3i,a4r,a4i,a5r,a5i,a6r,a6i
+c           print*,'f1r,f1i,..'
+c           print'(13(g12.5))',f1r,f1i,f2r,f2i,f3r,f3i,f4r,f4i,f5r,f5i,f6r,f6i
 c            stop
-            endif
+c            endif
         f11n(it,iw,iq2)=f1r*f1r+f1i*f1i
         f12rn(it,iw,iq2)=f1r*f2r+f1i*f2i
         f12in(it,iw,iq2)=f1i*f2r-f1r*f2i
@@ -540,6 +548,32 @@ c            stop
        do iq2=1,nq2
            rargex(nt+nw+iq2)=q2net(iq2) 
         enddo
+        ! Example loop structure to calculate and print values
+c        do it = 1, size(f11n, 1)  ! Adjust size accordingly
+c            do iw = 1, size(f11n, 2)
+c                do iq2 = 1, size(f11n, 3)
+c                    ! Print values
+c                    ! print *, 'f11n(', it, ',', iw, ',', iq2, ') = ',f11n(it, iw, iq2)
+c                    print *,f11n(it, iw,iq2),f12rn(it,iw,iq2),
+c     &              f12in(it,iw,iq2),f13rn(it,iw,iq2),f13in(it,iw,iq2),
+c     &              f14rn(it,iw,iq2), f14in(it,iw,iq2),
+c     &              f15rn(it,iw,iq2), f15in(it,iw,iq2),
+c     &              f16rn(it,iw,iq2), f16in(it,iw,iq2), f22n(it,iw,iq2),
+c     &              f23rn(it,iw,iq2), f23in(it,iw,iq2),
+c     &              f24rn(it,iw,iq2), f24in(it,iw,iq2),
+c     &              f25rn(it,iw,iq2), f25in(it,iw,iq2),
+c     &              f26rn(it,iw,iq2), f26in(it,iw,iq2), f33n(it,iw,iq2),
+c     &              f34rn(it,iw,iq2), f34in(it,iw,iq2),
+c     &              f35rn(it,iw,iq2), f35in(it,iw,iq2),
+c     &              f36rn(it,iw,iq2), f36in(it,iw,iq2), f44n(it,iw,iq2),
+c     &              f45rn(it,iw,iq2), f45in(it,iw,iq2),
+c     &              f46rn(it,iw,iq2), f46in(it,iw,iq2),
+c     &              f55n(it,iw,iq2), f56rn(it,iw,iq2), f56in(it,iw,iq2),
+c     &              f66n(it,iw,iq2)
+c                end do
+c            end do
+c        end do
+
 c      PRINT *, 'The f11 is ', f11n
 c      PRINT *, 'The f12r is ', f12rn
       end
@@ -928,12 +962,15 @@ c       print*
       integer i,j
         mu=ph0/mp+pl*(2d0*ta*mp2-sx)/mp/sqrt(lq)-2d0*mp*pt*cos(phih-phik
      & )*sqrt((ta-tamin)*(tamax-ta)/lq)
+c        print*,'in
+c     &  sigex,mu,ta,sx,lq,pt,phih,phik,tamin,tamax',mu,ta,sx,lq,pt,phih,phik,tamin,tamax
         z1=(q2*sp+ta*(s*sx+2d0*mp2*q2)-2d0*mp*sqrt((ta-tamin)*(tamax-ta)
      & *l1)*cos(phik))/lq
         call tails(ta,phik,tmr,mu,z1)
             r=(mp2+mpi2-mn2-q2+(1d0-z)*sx-2d0*vm)/(1d0+ta-mu)
             q2r=q2+ta*r
             w2r=sx-q2+mp2-(ta+1d0)*r
+            print*,'vm,mu,Rex,ta,phik,q2r,w2r',vm,mu,r,ta,phik,q2r,w2r
             if(etal**2+etat**2.gt.5d-1)then
 
          lqr=(sx-r)**2+4d0*mp2*q2r   
@@ -1039,6 +1076,10 @@ c               print*,'c1',cdph,sdph,cdph**2+sdph**2
       real*8 arg(3),dfint
       real*8 w00p,w11p,w22,w22r,w01r,w01i,w02r,w02i,w12r,w12i
       real*8 r0,r1,r2,r3,r4,r5,w
+      real*8 H00pH22_000,H11mH22opt2_000,H22_000,H01r_000,H01i_000,
+     & H00pH22_010,H11mH22opt2_010,H22_010,H01r_010,H01i_010,
+     & H02r_100,H02i_100,H12r_100,H12i_100,H02r_001,H02i_001,
+     & H12r_001, H12i_001
       data a2/1.15d0/,a30/-1.23d0/,a31/0.16d0/
       thcm=acos(((w2+mpi2-mn2)*(w2-q2-mp2)+2d0*w2*(t+q2-mpi2))/
      & sqrt(((w2+mpi2-mn2)**2-4d0*mpi2*w2)*((w2-q2-mp2)**2+4d0*q2*w2)))
@@ -1065,7 +1106,7 @@ c      print*,'Using extrapolation from MAID2003 (A.Browman PRL35,Cornell)'
       w2arg=w2
       wcor=1.d0
       endif
-
+      print*,'chect ex thcm,w2arg,q2arg',180d0/pi*thcm,w2arg,q2arg
         arg(1)=180d0/pi*thcm
         arg(2)=sqrt(w2arg)*1000d0
         arg(3)=q2arg
@@ -1074,6 +1115,7 @@ c      print*,'Using extrapolation from MAID2003 (A.Browman PRL35,Cornell)'
             zz=1d0+(t+mp2-mn2)/sx
             pt=sqrt(((mp2+sx+ t-mn2)*(sx*(mpi2-q2-t)+q2*(mp2+sx+t-mn2))
      & -mpi2*sx**2-mp2*((mpi2+q2+ t)**2-4*mpi2*t))/lq)  
+        print*,'check sx,lq,zz,pt',sx,lq,zz,pt
         f11=wcor*q2cor*dfint(3,arg,nargex,rargex,f11n)   
         f22=wcor*q2cor*dfint(3,arg,nargex,rargex,f22n)   
         f33=wcor*q2cor*dfint(3,arg,nargex,rargex,f33n)   
@@ -1119,9 +1161,9 @@ c      print*,'Using extrapolation from MAID2003 (A.Browman PRL35,Cornell)'
         r4=(w-mn)**2-mpi2
         r5=(mpi2-mn2)*(mp2+q2)+(mn2+mp2+mpi2-q2-2d0*t)*w2-w2**2
         w00p=un*((f11*r1*r3*(mp-w)**2+f22*r2*r4*(mp+w)**2)/2.
-     & +2*q2*(r3/r1*f55+r4/r2*f66)*w2+ 
-     & (r5*(lq*(w2-mp2)*f12r-4*q2*w2*f56r))/r1/r2)/w2+
-     &  2*etat*pt*sdph*(lq*(w2-mp2)*f12i+4*q2*w2*f56i)/sqrt(lq)/w 
+     & +2*q2*(r3/r1*f55+r4/r2*f66)*w2 
+     & +(r5*(lq*(w2-mp2)*f12r-4*q2*w2*f56r))/r1/r2)/w2
+     &  +2*etat*pt*sdph*(lq*(w2-mp2)*f12i+4*q2*w2*f56i)/sqrt(lq)/w 
         w22=(2*etat*f12i*sqrt(lq)*pt*sdph*(w2-mp2))/w+un*(f11*r1*r3*
      & (w-mp)**2+f22*r2*r4*(mp+W)**2+2*f12r*r5*(w2-mp2))/2d0/w2
         w11p= (un*(r1*(w-mp)**2*(r4*f44+4*w*f14r)+r2*(w+mp)**2*(r3*f33
@@ -1166,13 +1208,73 @@ c      print*,'Using extrapolation from MAID2003 (A.Browman PRL35,Cornell)'
         hsfex(8)=w12r/sqrt(lq)/pt**2/4d0/pi/alpha
         hsfex(9)=-w12i/sqrt(lq)/pt**2/4d0/pi/alpha
             
+        print*,'r0,r1,r2,r3,r3,r5',r0,r1,r2,r3,r4,r5
         print*,'it,iw,iq2,q2,w,t',it,iw,iq2,q2,w,t
-        print*,'f11,f22'
-        print'(13(g12.5))',f11,f22
-        print*,'w00p,w22,w11p'
-        print'(13(g12.5))',w00p,w22,w11p
- 
-            end
+c        print*,'f1r,f2r',f1r,f2r
+        print*,'wcor,q2cor'
+        print'(13(g12.5))',wcor,q2cor
+        print*,'f11,f22,f33,f44,f55,f66'
+        print'(13(g12.5))',f11,f22,f33,f44,f55,f66
+        print*,'f11,f12r,f12i'
+        print'(13(g12.5))',f11,f12r,f12i,f13r,f13i,f14r,f14i,f15r,f15i
+     & ,f16r,f16i,f22,f23r,f23i,f24r,f24i,f25r,f25i,f26r,f26i,f33,f34r
+     & ,f34i,f35r,f35i,f36r,f36i,f44,f45r,f45i,f46r,f46i,f55,f56r,f56i
+     & ,f66
+        print*,'un',un
+        print*,'w00p,w22,w11p,w01r,w01i,w02r,w02i,w12r,w12i'
+        print'(13(g12.5))',w00p,w22,w11p,w01r,w01i,w02r,w02i,w12r,w12i
+        print*,'Hsfex(1,2,3,4,5,6,7,8,9)'
+        print'(13(g12.5))',hsfex(1),hsfex(2),hsfex(3),hsfex(4),hsfex(5)
+     &   ,hsfex(6),hsfex(7),hsfex(8),hsfex(9)
+c     check each exclusive structure functions
+        H00pH22_000=un*((f11*r1*r3*(mp-w)**2+f22*r2*r4*(mp+w)**2)/2.
+     & +2*q2*(r3/r1*f55+r4/r2*f66)*w2 
+     & +(r5*(lq*(w2-mp2)*f12r-4*q2*w2*f56r))/r1/r2)/w2
+        H00pH22_010=2*pt*(lq*(w2-mp2)*f12i+4*q2*w2*f56i)/sqrt(lq)/w 
+        H22_010=(2*f12i*sqrt(lq)*pt*(w2-mp2))/w
+        H22_000=un*(f11*r1*r3*
+     & (w-mp)**2+f22*r2*r4*(mp+W)**2+2*f12r*r5*(w2-mp2))/2d0/w2
+        H11mH22opt2_000= (un*(r1*(w-mp)**2*(r4*f44+4*w*f14r)
+     &   +r2*(w+mp)**2*(r3*f33+4*w*f23r)+2*r5*(mp2-w2)*f34r))/2/w2
+        H11mH22opt2_010=+(r5*(f14i*r1*(mp-W)**2
+     & -f23i*r2*(mp+w)**2)+lq*(r4*f24i-r3*f13i-4*w*f12i+2*pt**2*w*f34i)*
+     & (w2-mp2))/sqrt(lq)/pt/w2    
+        H01r_000=pt*sqrt(q2)*un*(r1*(mp-W)*(r4*f46r+2*w*f16r)-r2*(mp+w)
+     &  *(r3*f35r+2*w*f25r)+r5*(f45r*(w-mp)+ (mp + W)*f36r))/sqrt(lq)/w
+        H01r_010=(sqrt(q2)*(r5*(f16i*r1*(mp-w)+f25i*r2*(mp+w))
+     & -lq*(f15i*r3*(mp-w)+f26i*r4*(mp+w)+2*pt**2*W*(f45i*(mp-W)
+     & +f36i*(mp+w)))))/r1/r2/w
+        H01i_000=pt*Sqrt(Q2)*un*(r1*(w-mp)*(r4*f46i+2*w*f16i)+r2*(mp+w)*
+     & (f35i*r3+2*f25i*w)+r5*(f45i*(mp-w)-f36i*(mp+w)))/sqrt(lq)/w 
+        H01i_010=sqrt(q2)*(r5*(f16r*r1*(mp-w)+f25r*r2*(mp+w))
+     & -lq*(f15r*r3*(mp-w)+f26r*r4*(mp+w)+2*pt**2*w*(f45r*(mp-w)
+     & +f36r*(mp+w))))/r1/r2/W
+        H02r_001=2*pt*Sqrt(Q2)*(f25i*r2*(mp+w)-f16i*r1*(mp-w))
+     $   /Sqrt(lq)
+        H02r_100=Sqrt(Q2)*((f16i*r1*r5-f15i*lq*r3)*(w-mp)
+     & +r2*(f26i*r1*r4-f25i*r5)*(mp+w))/r1/r2/w    
+        H02i_001=2*pt*Sqrt(Q2)*(f25r*r2*(mp+w)-f16r*r1*(mp-w))
+     &   /Sqrt(lq)
+        H02i_100=(Sqrt(Q2)*((f16r*r1*r5-f15r*lq*r3)*(w-mp)
+     & +r2*(f26r*r1*r4-f25r*r5)*(mp+w)))/r1/r2/w
+        H12r_001=-pt**2*(f14i*r1*(mp-w)**2+f23i*r2*(mp+w)**2)/w
+        H12r_100=pt*(r2*(mp+w)*(f23i*r5*(mp+w)+r1*(mp-w)*
+     & (f24i*r4-4*f12i*w))-f14i*r1*r5*(mp-w)**2-f13i*lq*r3*(mp2-w2))
+     & /2d0/sqrt(lq)/w2  
+        H12i_001=(-(r1*r2*(f11*r1*r3*(mp-w)**2+f22*r2*r4*(mp+w)**2)
+     &  )+2*(-(lq*pt**2*W*(f14r*r1*(mp-w)**2+f23r*r2*(mp+w)**2))+ 
+     &          f12r*lq*r5*(mp2-w2)))/2./r1/r2/w2  
+        H12i_100=(pt*(-f14r*r1*r5*(mp-W)**2+r2*(f23r*r5*
+     &   (mp+W)**2+f24r
+     & *r1*r4*(mp2-w2))+f13r*lq*r3*(w2-mp2)))/ (2.*Sqrt(lq)*W**2)
+        print*,'H00pH22_000,H11mH22opt2_000,H22_000,H01r_000,H01i_000,
+     &  H00pH22_010,H11mH22opt2_010,H22_010,H01r_010,H01i_010,H02r_100,
+     &  H02i_100,H12r_100,H12i_100,H02r_001,H02i_001,H12r_001,H12i_001'
+        print*,H00pH22_000,H11mH22opt2_000,H22_000,H01r_000,H01i_000,
+     &  H00pH22_010,H11mH22opt2_010,H22_010,H01r_010,H01i_010,H02r_100,
+     &  H02i_100,H12r_100,H12i_100,H02r_001,H02i_001,H12r_001,H12i_001
+
+      end
 
        
        subroutine tails(ta,phik,tmr,mu,z1)

@@ -1,0 +1,5 @@
+The fortran file for the traditional way with exclusive contribution
+To compile: gfortran -ffixed-line-length-none haprad3_me.f -o haprad3
+
+Eur. Phys. J.A (2023) 59:246
+
